@@ -145,6 +145,17 @@ const DOM = {
 
 //Para modificação dos dados de valor, colocando a moeda e características de positivo ou negativo//
 const Utils = {
+  formatAmount (value){
+    value = Number(value) * 100
+    
+    return value
+  },
+
+  formatDate (date){
+    const splittedDate = date.split("-")
+    return `${splittedDate[2]}/${splittedDate[1]}/${splittedDate[0]}`
+  },
+
   formatCurrency(value) {
     const signal = Number(value) < 0 ? "-" : "";
 
@@ -166,23 +177,70 @@ const Form = {
     amount: document.querySelector('input#amount'),
     date: document.querySelector('input#date'),
 
-    getValeus(){
+    // Pegar somente os valores
+    getValues() {
       return{
         description: Form.description.value,
         amount: Form.amount.value,
-        date: Form.date.value
+        date: Form.date.value,
       }
     },
-    
+
+    // Validação dos campos  
     validateFields(){
-     
-      console.log(Form.getValeus())
+      const { description, amount, date } = Form.getValues()
+      
+      if (description.trim() === "" || 
+          amount.trim() === "" || 
+          date.trim() === ""){
+            throw new Error("Por favor preencha todos os campos")
+      }
+    },
+
+    formatValues (){
+      let { description, amount, date } = Form.getValues()
+
+      amount = Utils.formatAmount (amount)
+
+      date = Utils.formatDate (date)
+
+      return {
+        description,
+        amount,
+        date
+      }
+
+    },
+
+    //salvar transação
+    saveTransaction(transaction){
+        Transaction.add(transaction)
+    },
+
+
+  //Limpar os campos
+    clearFields(){
+        Form.description.value = ""
+        Form.amount.value = ""
+        Form.date.value = ""
     },
 
     submit (event){
       event.preventDefault()
 
-      Form.validateFields()
+      try {
+
+        Form.validateFields()
+        const transction = Form.formatValues()
+        Form.saveTransaction(transaction)
+        Form.clearFields()
+        Modal.close()
+        
+      } catch (error){
+         alert(error.message)
+      }
+
+      
     }
 }
 
